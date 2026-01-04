@@ -1,0 +1,3 @@
+#So a little game, The .html and the 5 files on issues folder have to be on the same folder...assuming you know how to copy paste the code and name it for example cookies.HTML....then in order to play the little game you have to double click the .html file...
+#So just copy paste the .html file on code folder save it as cookies.HTML on the same folder use copy paste the images of the issues folder and that's it double click the .html file and  fave some fun with cookie the cat, who is also been called ruby!! 
+#And don't forget: quickly cookie go to read your book!!
