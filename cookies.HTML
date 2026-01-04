@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Cat Game</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a1a;
+            color: white;
+        }
+
+        #game-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            background-image: url('ruby1.jpg'); /* Replace with your bg image */
+            background-size: cover;
+            background-position: center;
+            transition: background 0.5s, filter 1s;
+        }
+
+        /* The Cat */
+        #cat {
+            position: absolute;
+            bottom: 100px;
+            left: 100px;
+            width: 200px;
+            transition: all 0.5s ease-in-out;
+            z-index: 10;
+            filter: hue-rotate(0deg);
+        }
+
+        /* The Book */
+        #book {
+            position: absolute;
+            bottom: 80px;
+            right: 150px;
+            width: 120px;
+            display: none;
+            z-index: 5;
+        }
+
+        /* UI Elements */
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #fff;
+            z-index: 100;
+        }
+
+        .stats {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #00ffcc;
+            font-weight: bold;
+        }
+
+        .controls button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            margin-right: 5px;
+            background: #fff;
+            color: #333;
+            transition: 0.3s;
+        }
+
+        .controls button:hover {
+            background: #00ffcc;
+            transform: scale(1.05);
+        }
+
+        /* Effects */
+        .banana {
+            position: absolute;
+            font-size: 40px;
+            cursor: pointer;
+            z-index: 8;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .z-text {
+            position: absolute;
+            font-size: 30px;
+            color: #fff;
+            animation: driftUp 2s forwards;
+            pointer-events: none;
+        }
+
+        @keyframes driftUp {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-100px); }
+        }
+
+        .sleeping-mask {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 30, 0.6);
+            display: none;
+            pointer-events: none;
+            z-index: 50;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div class="sleeping-mask" id="mask"></div>
+    
+    <!-- UI -->
+    <div id="ui">
+        <div class="stats">Points: <span id="score">0</span></div>
+        <div class="controls">
+            <button onclick="startAction('read')">Read Book</button>
+            <button onclick="startAction('sleep')">Sleep</button>
+            <button onclick="startAction('eat')">Spawn Banana</button>
+        </div>
+        <p style="font-size: 12px; margin-top: 10px;">Press <b>SPACE</b> to change Cat Color!</p>
+    </div>
+
+    <!-- Assets -->
+    <img src="ruby8.png" id="cat" alt="Cat"> <!-- Replace with your cat image -->
+    <img src="ruby4.png" id="book" alt="Book"> <!-- Replace with your book image -->
+</div>
+
+<script>
+    let score = 0;
+    let hue = 0;
+    let isBusy = false;
+    const cat = document.getElementById('cat');
+    const book = document.getElementById('book');
+    const scoreDisplay = document.getElementById('score');
+    const container = document.getElementById('game-container');
+    const mask = document.getElementById('mask');
+
+    // Backgrounds provided in assets
+    const backgrounds = [
+        'ruby1.jpg', // Abstract black/white
+        'ruby2.jpg', // Room with spheres
+        'ruby3.jpg'  // Shadowy room
+    ];
+    let currentBg = 0;
+
+    // 1. Change color with Space Button
+    window.addEventListener('keydown', (e) => {
+        if (e.code === 'Space') {
+            hue = (hue + 45) % 360;
+            cat.style.filter = `hue-rotate(${hue}deg)`;
+            
+            // Cycle backgrounds too for variety
+            currentBg = (currentBg + 1) % backgrounds.length;
+            container.style.backgroundImage = `url('${backgrounds[currentBg]}')`;
+        }
+    });
+
+    function startAction(type) {
+        if (isBusy && type !== 'eat') return;
+
+        if (type === 'read') {
+            readAction();
+        } else if (type === 'sleep') {
+            sleepAction();
+        } else if (type === 'eat') {
+            spawnBanana();
+        }
+    }
+
+    // 2. Reading Action
+    function readAction() {
+        isBusy = true;
+        book.style.display = 'block';
+        cat.style.left = 'calc(100% - 350px)';
+        
+        setTimeout(() => {
+            updateScore(10);
+            alert("The cat learned something new!");
+            cat.style.left = '100px';
+            book.style.display = 'none';
+            isBusy = false;
+        }, 3000);
+    }
+
+    // 3. Sleeping Action
+    function sleepAction() {
+        isBusy = true;
+        mask.style.display = 'block';
+        
+        let sleepInterval = setInterval(() => {
+            const z = document.createElement('div');
+            z.className = 'z-text';
+            z.innerText = 'Zzz...';
+            z.style.left = (parseInt(cat.style.left) + 100) + 'px';
+            z.style.bottom = '300px';
+            container.appendChild(z);
+            setTimeout(() => z.remove(), 2000);
+        }, 800);
+
+        setTimeout(() => {
+            clearInterval(sleepInterval);
+            mask.style.display = 'none';
+            updateScore(5);
+            isBusy = false;
+        }, 4000);
+    }
+
+    // 4. Eating Bananas & Collecting Points
+    function spawnBanana() {
+        const banana = document.createElement('div');
+        banana.className = 'banana';
+        banana.innerText = '🍌';
+        banana.style.left = Math.random() * 80 + 'vw';
+        banana.style.top = Math.random() * 60 + 'vh';
+        
+        banana.onclick = () => {
+            // Cat moves to banana
+            cat.style.left = banana.style.left;
+            cat.style.bottom = (100 - parseInt(banana.style.top)) + 'px'; // Simplified movement
+            
+            setTimeout(() => {
+                banana.remove();
+                updateScore(20);
+                // Return to floor
+                cat.style.bottom = '100px';
+            }, 500);
+        };
+
+        container.appendChild(banana);
+    }
+
+    function updateScore(amount) {
+        score += amount;
+        scoreDisplay.innerText = score;
+    }
+</script>
+
+</body>
+</html>
